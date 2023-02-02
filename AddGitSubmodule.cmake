@@ -13,27 +13,39 @@ function(add_git_submodule dir)
     message("dir: ${dir}")
     message("dir_absolute: ${dir_absolute}")
 
+    # Update submodules as needed
+    option(GIT_SUBMODULE "Check submodules during build" ON)
+    if (NOT GIT_SUBMODULE)
+        message("Checking submodules during build is disabled.")
+        add_subdirectory(${dir})
+        return()
+    endif ()
+
+    # maybe this check is not necessary
+    if (NOT EXISTS "${PROJECT_SOURCE_DIR}/.git")
+        message("No git repository in ${PROJECT_SOURCE_DIR}")
+    endif ()
+
     find_package(Git)
-    if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+    if (NOT GIT_FOUND)
+        message("Git package not found.")
+        add_subdirectory(${dir})
+        return()
+    endif ()
 
-        # Update submodules as needed
-        option(GIT_SUBMODULE "Check submodules during build" ON)
-        if (GIT_SUBMODULE)
-            if (NOT EXISTS ${dir_absolute}/CMakeLists.txt)
-                message(STATUS "Submodule update/init")
-                execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive -- ${dir_absolute}
-                        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                        COMMAND_ERROR_IS_FATAL ANY)
-            endif ()
-        endif ()
-    else()
-        message("Git package not found or '${PROJECT_SOURCE_DIR}/.git' does not exist")
-    endif()
+    if (EXISTS ${dir_absolute}/CMakeLists.txt)
+        message("Git submodule ${dir} found and already checked out.")
+        add_subdirectory(${dir})
+        return()
+    endif ()
 
+    message(STATUS "Git submodule ${dir} update/init")
+    execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive -- ${dir_absolute}
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+            COMMAND_ERROR_IS_FATAL ANY)
 
     if (NOT EXISTS ${dir_absolute}/CMakeLists.txt)
-        message("Could not find ${dir_absolute}/CMakeLists.txt")
-        message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
+        message(WARNING "Could not find ${dir_absolute}/CMakeLists.txt even after running '${GIT_EXECUTABLE} submodule update --init --recursive -- ${dir_absolute}'")
     endif ()
 
     add_subdirectory(${dir})
