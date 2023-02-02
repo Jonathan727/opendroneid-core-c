@@ -15,8 +15,6 @@ function(initialize_git_submodules)
     endif ()
 
     cmake_path(ABSOLUTE_PATH dir BASE_DIRECTORY "${PROJECT_SOURCE_DIR}" OUTPUT_VARIABLE dir_absolute)
-    message("dir: ${dir}")
-    message("dir_absolute: ${dir_absolute}")
 
     # Update submodules as needed
     option(GIT_SUBMODULE "Check submodules during build" ON)
