@@ -5,7 +5,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FORTIFY_SOURCE=2 -fstack-protector \
     -fno-delete-null-pointer-checks -fwrapv -O0 -Wall -Wdouble-promotion \
     -Wno-address-of-packed-member -Wextra")
 
-option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 cmake_minimum_required(VERSION 2.8.12)
 
